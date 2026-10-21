@@ -30,7 +30,7 @@ def test_module_and_console_entrypoints_work_outside_project(tmp_path: Path) -> 
 def test_list_uses_registered_agent_entrypoints(capsys: pytest.CaptureFixture[str]) -> None:
     assert cli.main(["--list"]) == 0
     names = capsys.readouterr().out.splitlines()
-    assert {"krisj_coding", "krisj_echo"}.issubset(names)
+    assert {"krisj_starter", "krisj_echo"}.issubset(names)
     assert names == sorted(names)
 
 
@@ -80,8 +80,8 @@ def test_cli_passes_instruction_workdir_and_model_to_the_selected_agent(
     assert capsys.readouterr().out == "completed\n"
 
 
-def test_coding_scaffold_fails_explicitly(capsys: pytest.CaptureFixture[str]) -> None:
-    assert cli.main(["krisj_coding", "-i", "test"]) == 1
+def test_starter_scaffold_fails_explicitly(capsys: pytest.CaptureFixture[str]) -> None:
+    assert cli.main(["krisj_starter", "-i", "test"]) == 1
     assert "Implement the UNC Azure model/tool loop" in capsys.readouterr().err
 
 

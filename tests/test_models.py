@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from agents590.contracts import RunContext
-from agents590.krisj_coding import CodingAgent
+from agents590.krisj_starter import StarterAgent
 
 
 @pytest.fixture(autouse=True)
@@ -43,7 +43,7 @@ def test_per_run_model_precedes_environment_defaults(
         if value is not None:
             monkeypatch.setenv(name, value)
     context = RunContext(cwd=tmp_path, model=run_model)
-    assert CodingAgent().provider_settings(context).model == expected
+    assert StarterAgent().provider_settings(context).model == expected
 
 
 @pytest.mark.parametrize("model", ["", " ", "openai/", "anthropic/model", "azure/model"])
@@ -52,14 +52,14 @@ def test_invalid_explicit_model_never_falls_back(
 ) -> None:
     monkeypatch.setenv("OPENAI_MODEL", "working-default")
     with pytest.raises(ValueError):
-        CodingAgent().provider_settings(RunContext(cwd=tmp_path, model=model))
+        StarterAgent().provider_settings(RunContext(cwd=tmp_path, model=model))
 
 
 def test_missing_model_fails(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="OPENAI_MODEL"):
-        CodingAgent().provider_settings(RunContext(cwd=tmp_path))
+        StarterAgent().provider_settings(RunContext(cwd=tmp_path))
 
 
-def test_coding_loop_is_still_a_scaffold(tmp_path: Path) -> None:
+def test_starter_loop_is_still_a_scaffold(tmp_path: Path) -> None:
     with pytest.raises(NotImplementedError):
-        asyncio.run(CodingAgent().run("test", RunContext(cwd=tmp_path)))
+        asyncio.run(StarterAgent().run("test", RunContext(cwd=tmp_path)))

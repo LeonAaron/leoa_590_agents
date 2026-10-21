@@ -19,7 +19,7 @@ directory, `--model` overrides the agent's model, and `--env-file` explicitly lo
 configuration without overriding variables already exported in the shell.
 
 The `krisj_echo` agent returns the instruction without tools or API requests. The
-`krisj_coding` agent is the migrated course scaffold: its model/tool loop intentionally
+`krisj_starter` agent is the migrated course scaffold: its model/tool loop intentionally
 raises `NotImplementedError` until implemented. Its settings already support
 per-run model overrides through `RunContext.model`.
 
@@ -52,7 +52,7 @@ packages to register additional agents. Duplicate names produce an error.
 ```sh
 cp .env.example .env
 # Fill in your UNC subscription key and an enabled deployment alias.
-uv run agents590 krisj_coding --env-file .env --model openai/YOUR_DEPLOYMENT -i "..."
+uv run agents590 krisj_starter --env-file .env --model openai/YOUR_DEPLOYMENT -i "..."
 ```
 
 The coding loop remains a scaffold. To explicitly make one billable connectivity
