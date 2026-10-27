@@ -15,6 +15,7 @@ openai-smoke = "agents590.smoke:main"
 
 [project.entry-points."agents590.agents"]
 leoa_CamelAgent = "agents590.leoa_CamelAgent:leoa_CamelAgent"
+leoa_ShellAgent = "agents590.leoa_ShellAgent:leoa_ShellAgent"
 krisj_starter = "agents590.krisj_starter:StarterAgent"
 krisj_echo = "agents590.krisj_echo:EchoAgent"
 
