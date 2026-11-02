@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 import sys
+from pathlib import Path
 from typing import Any
 
 from openai.types.responses import ResponseFunctionToolCall
@@ -40,6 +41,20 @@ TOOL: Any = {
 INCLUDE: list[Any] = ["reasoning.encrypted_content"]
 
 
+# Bootstrapped skills lister
+def list_skills(context: RunContext) -> str:
+    """List skill paths and frontmatter, never their bodies."""
+    skills: list[str] = []
+    for root in (Path.home(), context.cwd):
+        for path in sorted((root / ".agents/skills").glob("*/SKILL.md")):
+            frontmatter = path.read_text().split("---")[1:2]
+            skills.append("\n".join([str(path), *frontmatter]))
+    if not skills:
+        return ""
+    heading = "Read the SKILL.md of any skill that matches the task before doing the task:\n"
+    return heading + "\n\n".join(skills) + "\n\n"
+
+
 def run_shell(command: str, context: RunContext) -> str:
     """Run a shell command and return the output and exit code."""
     try:
@@ -65,7 +80,9 @@ class leoa_ShellAgent:
         settings = UNCOpenAISettings.from_env(model=context.model)
 
         # Maintain chat history, starting with system prompt and instruction
-        history: list[Any] = [{"role": "user", "content": f"{SYSTEM}\n\n{instruction}"}]
+        history: list[Any] = [
+            {"role": "user", "content": f"{SYSTEM}\n\n{list_skills(context)}{instruction}"}
+        ]
 
         async with settings.create_async_client() as client:
             # Give the AI model up to MAX_TURNS turns to complete the task successfully
