@@ -35,7 +35,6 @@ TOOLS: list[Any] = [
         "type": "function",
         "name": "submit_file",
         "description": "Submit the converted Python file for validation.",
-
         # Input parameter format for tool
         "parameters": {
             "type": "object",
@@ -77,6 +76,7 @@ def variable_names(tree: ast.AST) -> set[str]:
 
     return names
 
+
 # Compare AI Model Changes to identify mistakes and possibly rerun the model
 def problems(original: str, converted: str) -> str:
     """Return a validation error, or an empty string if valid."""
@@ -104,7 +104,6 @@ class leoa_CamelAgent:
     def provider_settings(self, context: RunContext) -> UNCOpenAISettings:
         return UNCOpenAISettings.from_env(model=context.model)
 
-    
     async def run(self, instruction: str, context: RunContext) -> str:
         try:
             # Identify Python file to be changed according to instruction

@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 import sys
+from pathlib import Path
 from typing import Any
 
 from openai.types.responses import ResponseFunctionToolCall
@@ -12,29 +13,59 @@ from agents590.contracts import RunContext
 from agents590.provider import UNCOpenAISettings
 
 # No __pycache__ folders in the task directory to fix an evaluation failure
-os.environ["PYTHONDONTWRITEBYTECODE"] = "1"  
+os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
 
 
 # System Prompt
-SYSTEM = "You are a coding agent in a Linux shell. Make the requested changes and verify them."
+SYSTEM = (
+    "You are a coding agent in a Linux shell. Read AGENTS.md first if it exists. "
+    "Make the requested changes and verify them."
+)
+
+# Enough turns for the agent to read, edit, and test code, including its own
+MAX_TURNS = 30
 
 
 # The only tool that the model can use is running a shell command
 TOOL: Any = {
     "type": "function",
     "name": "shell",
-    "parameters": {"type": "object", "properties": {"command": {"type": "string"}}},
+    "parameters": {
+        "type": "object",
+        "properties": {"command": {"type": "string"}},
+        "required": ["command"],
+    },
 }
 
 # Allows AI model to maintain its reasoning between turns
-INCLUDE: list[Any] = ["reasoning.encrypted_content"]  
+INCLUDE: list[Any] = ["reasoning.encrypted_content"]
+
+
+# Bootstrapped skills lister
+def list_skills(context: RunContext) -> str:
+    """List skill paths and frontmatter, never their bodies."""
+    skills: list[str] = []
+    for root in (Path.home(), context.cwd):
+        for path in sorted((root / ".agents/skills").glob("*/SKILL.md")):
+            frontmatter = path.read_text().split("---")[1:2]
+            skills.append("\n".join([str(path), *frontmatter]))
+    if not skills:
+        return ""
+    heading = "Read the SKILL.md of any skill that matches the task before doing the task:\n"
+    return heading + "\n\n".join(skills) + "\n\n"
 
 
 def run_shell(command: str, context: RunContext) -> str:
     """Run a shell command and return the output and exit code."""
     try:
         result = subprocess.run(
-            command, shell=True, cwd=context.cwd, capture_output=True, text=True, timeout=60
+            command,
+            shell=True,
+            cwd=context.cwd,
+            capture_output=True,
+            text=True,
+            timeout=60,
+            stdin=subprocess.DEVNULL,
         )
     # Timeout for command execution
     except subprocess.TimeoutExpired:
@@ -49,12 +80,13 @@ class leoa_ShellAgent:
         settings = UNCOpenAISettings.from_env(model=context.model)
 
         # Maintain chat history, starting with system prompt and instruction
-        history: list[Any] = [{"role": "user", "content": f"{SYSTEM}\n\n{instruction}"}]
+        history: list[Any] = [
+            {"role": "user", "content": f"{SYSTEM}\n\n{list_skills(context)}{instruction}"}
+        ]
 
         async with settings.create_async_client() as client:
-            # Give the AI model up to 6 turns to complete the task successfully
-            for _ in range(6):
-
+            # Give the AI model up to MAX_TURNS turns to complete the task successfully
+            for _ in range(MAX_TURNS):
                 # response from AI model
                 response = await client.responses.create(
                     model=settings.model, input=history, tools=[TOOL], include=INCLUDE, store=False
@@ -107,5 +139,11 @@ make agent AGENT=leoa_ShellAgent AGENTS_PROJECT=../leoa_590_agents ENV_FILE=../l
 In separate terminal:
 
 uv run --locked harbor view jobs
+
+
+WithIn Dev Container for BootStrapping:
+
+uv run --locked agents590 leoa_ShellAgent --env-file .env -i "Task description"
+
 
 """
