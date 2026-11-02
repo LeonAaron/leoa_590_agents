@@ -12,7 +12,7 @@ from agents590.contracts import RunContext
 from agents590.provider import UNCOpenAISettings
 
 # No __pycache__ folders in the task directory to fix an evaluation failure
-os.environ["PYTHONDONTWRITEBYTECODE"] = "1"  
+os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
 
 
 # System Prompt
@@ -33,7 +33,7 @@ TOOL: Any = {
 }
 
 # Allows AI model to maintain its reasoning between turns
-INCLUDE: list[Any] = ["reasoning.encrypted_content"]  
+INCLUDE: list[Any] = ["reasoning.encrypted_content"]
 
 
 def run_shell(command: str, context: RunContext) -> str:
@@ -66,7 +66,6 @@ class leoa_ShellAgent:
         async with settings.create_async_client() as client:
             # Give the AI model up to MAX_TURNS turns to complete the task successfully
             for _ in range(MAX_TURNS):
-
                 # response from AI model
                 response = await client.responses.create(
                     model=settings.model, input=history, tools=[TOOL], include=INCLUDE, store=False
