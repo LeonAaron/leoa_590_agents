@@ -1,6 +1,9 @@
 {
   "name": "leoa_590_agents",
   "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
-  "containerEnv": { "UV_PROJECT_ENVIRONMENT": "/home/vscode/.venv" },
-  "postCreateCommand": "pip install --user uv==0.10.6 && uv sync --locked"
+  "containerEnv": {
+    "UV_PROJECT_ENVIRONMENT": "/home/vscode/.venv",
+    "PYRIGHT_PYTHON_NODE_VERSION": "22.12.0"
+  },
+  "postCreateCommand": "pip install --user uv==0.10.6 && uv sync --locked && git config --global --add safe.directory ${containerWorkspaceFolder} && git config --global core.autocrlf input"
 }
