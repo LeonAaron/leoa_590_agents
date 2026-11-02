@@ -1,0 +1,6 @@
+{
+  "name": "leoa_590_agents",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
+  "containerEnv": { "UV_PROJECT_ENVIRONMENT": "/home/vscode/.venv" },
+  "postCreateCommand": "pip install --user uv==0.10.6 && uv sync --locked"
+}

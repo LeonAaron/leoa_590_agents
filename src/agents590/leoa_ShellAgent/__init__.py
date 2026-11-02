@@ -16,7 +16,13 @@ os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
 
 
 # System Prompt
-SYSTEM = "You are a coding agent in a Linux shell. Make the requested changes and verify them."
+SYSTEM = (
+    "You are a coding agent in a Linux shell. Read AGENTS.md first if it exists. "
+    "Make the requested changes and verify them."
+)
+
+# Enough turns for the agent to read, edit, and test code, including its own
+MAX_TURNS = 30
 
 
 # The only tool that the model can use is running a shell command
@@ -34,7 +40,13 @@ def run_shell(command: str, context: RunContext) -> str:
     """Run a shell command and return the output and exit code."""
     try:
         result = subprocess.run(
-            command, shell=True, cwd=context.cwd, capture_output=True, text=True, timeout=60
+            command,
+            shell=True,
+            cwd=context.cwd,
+            capture_output=True,
+            text=True,
+            timeout=60,
+            stdin=subprocess.DEVNULL,
         )
     # Timeout for command execution
     except subprocess.TimeoutExpired:
@@ -52,8 +64,8 @@ class leoa_ShellAgent:
         history: list[Any] = [{"role": "user", "content": f"{SYSTEM}\n\n{instruction}"}]
 
         async with settings.create_async_client() as client:
-            # Give the AI model up to 6 turns to complete the task successfully
-            for _ in range(6):
+            # Give the AI model up to MAX_TURNS turns to complete the task successfully
+            for _ in range(MAX_TURNS):
 
                 # response from AI model
                 response = await client.responses.create(
