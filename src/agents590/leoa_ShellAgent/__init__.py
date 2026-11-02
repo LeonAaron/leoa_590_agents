@@ -29,7 +29,11 @@ MAX_TURNS = 30
 TOOL: Any = {
     "type": "function",
     "name": "shell",
-    "parameters": {"type": "object", "properties": {"command": {"type": "string"}}},
+    "parameters": {
+        "type": "object",
+        "properties": {"command": {"type": "string"}},
+        "required": ["command"],
+    },
 }
 
 # Allows AI model to maintain its reasoning between turns
