@@ -123,4 +123,10 @@ In separate terminal:
 
 uv run --locked harbor view jobs
 
+
+WithIn Dev Container for BootStrapping:
+
+uv run --locked agents590 leoa_ShellAgent --env-file .env -i "Task description"
+
+
 """
